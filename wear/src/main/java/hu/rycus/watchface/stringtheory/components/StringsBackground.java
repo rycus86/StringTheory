@@ -1,16 +1,15 @@
 package hu.rycus.watchface.stringtheory.components;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.text.format.Time;
 import android.view.animation.DecelerateInterpolator;
 
 import hu.rycus.watchface.commons.Animation;
-import hu.rycus.watchface.commons.NonAmbientBackground;
+import hu.rycus.watchface.commons.Component;
 import hu.rycus.watchface.stringtheory.ui.Strings;
 
-public class Background extends NonAmbientBackground {
+public class StringsBackground extends Component {
 
     private static final int NUM_STRINGS = 10;
 
@@ -60,11 +59,15 @@ public class Background extends NonAmbientBackground {
     }
 
     @Override
-    protected void onDrawBackground(final Canvas canvas, final Time time) {
-        paint.setColor(Color.BLACK);
-        canvas.drawPaint(paint);
+    protected void onDraw(final Canvas canvas, final Time time) {
+        strings.draw(canvas, paint, !inAmbientMode);
+    }
 
-        strings.draw(canvas, paint);
+    @Override
+    protected void onTimeTick(final Time time) {
+        if (inAmbientMode) {
+            strings.skipToNextState();
+        }
     }
 
     @Override

@@ -1,6 +1,5 @@
 package hu.rycus.watchface.stringtheory.components;
 
-import android.content.res.AssetManager;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -12,59 +11,78 @@ import hu.rycus.watchface.commons.Component;
 
 public class HourAndMinute extends Component {
 
-    final AssetManager assetManager;
-    final Typeface normalTypeface;
-    final Typeface boldTypeface;
+    private static final String FONT_FAMILY = "sans-serif-condensed-light";
 
-    public HourAndMinute(final AssetManager assetManager) {
-        this.assetManager = assetManager;
+    private final Rect hourBounds = new Rect();
+    private final Rect minuteBounds = new Rect();
 
-        this.normalTypeface = Typeface.create("sans-serif-condensed-light", Typeface.NORMAL);
-        this.boldTypeface = Typeface.create("sans-serif-condensed-light", Typeface.BOLD);
-    }
+    private String hour;
+    private String minute;
+
+    private Typeface normalTypeface;
+    private Typeface boldTypeface;
 
     @Override
     protected void onSetupPaint(final Paint paint) {
+        this.normalTypeface = Typeface.create(FONT_FAMILY, Typeface.NORMAL);
+        this.boldTypeface = Typeface.create(FONT_FAMILY, Typeface.BOLD);
+
         paint.setAntiAlias(true);
         paint.setColor(Color.WHITE);
-        paint.setShadowLayer(2, 0, 2, Color.BLACK);
     }
 
     @Override
     protected void onSizeSet(final int width, final int height, final boolean round) {
         super.onSizeSet(width, height, round);
-        if (round) {
-            paint.setTextSize(64f);
-        } else {
-            paint.setTextSize(80f);
-        }
+
+        final Time currentTime = new Time();
+        currentTime.setToNow();
+        prepareValues(currentTime);
     }
 
-    final Rect textBounds = new Rect();
+    @Override
+    protected void onTimeTick(final Time time) {
+        prepareValues(time);
+    }
+
+    private void prepareValues(final Time time) {
+        final float baseTextSize = isRound ? 64f : 80f;
+
+        hour = time.format("%H");
+        paint.setTextSize(baseTextSize);
+        paint.setTypeface(boldTypeface);
+        paint.getTextBounds(hour, 0, hour.length(), hourBounds);
+
+        minute = time.format("%M");
+        paint.setTextSize(baseTextSize - 16f);
+        paint.setTypeface(normalTypeface);
+        paint.getTextBounds(minute, 0, minute.length(), minuteBounds);
+    }
 
     @Override
     protected void onDraw(final Canvas canvas, final Time time) {
-        final String hour = time.format("%H");
+        final float baseTextSize, left, top;
+
+        if (isRound) {
+            baseTextSize = 64f;
+            left = canvasWidth * 0.2f;
+            top = canvasHeight * 0.15f;
+        } else {
+            baseTextSize = 80f;
+            left = 20f;
+            top = 20f;
+        }
+
+        paint.setTextSize(baseTextSize);
         paint.setTypeface(boldTypeface);
-        paint.getTextBounds(hour, 0, hour.length(), textBounds);
-        final int boldWidth = textBounds.width();
-        final int boldHeight = textBounds.height();
+        canvas.drawText(hour, left, top + hourBounds.height(), paint);
 
-        final String minute = time.format("%M");
+        final float minuteTop = top + hourBounds.height() * 0.35f;
+        final float minuteLeft = left + hourBounds.width() * 1.1f;
+
+        paint.setTextSize(baseTextSize - 16f);
         paint.setTypeface(normalTypeface);
-        paint.getTextBounds(minute, 0, minute.length(), textBounds);
-        final int normalHeight = textBounds.height();
-
-        final int height = Math.max(boldHeight, normalHeight);
-        final int top = isRound ? 50 : 10;
-
-        final float textCenter = isRound ? canvasWidth * 0.35f : canvasWidth / 2f;
-
-        paint.setTypeface(boldTypeface);
-        canvas.drawText(hour, textCenter - boldWidth - 4, top + height, paint);
-
-        paint.setTypeface(normalTypeface);
-        canvas.drawText(minute, textCenter + 4, top + height, paint);
+        canvas.drawText(minute, minuteLeft, minuteTop + minuteBounds.height(), paint);
     }
 
 }

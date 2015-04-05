@@ -42,6 +42,8 @@ public class Strings {
 
         this.xLimit = width / 5;
         this.yLimit = height;
+
+        this.skipToNextState();
     }
 
     private void addStrings(final int count) {
@@ -84,9 +86,10 @@ public class Strings {
         return shader;
     }
 
-    public void draw(final Canvas canvas, final Paint paint) {
+    public void draw(final Canvas canvas, final Paint paint, final boolean colored) {
         for (final StringUI item : items) {
-            paint.setShader(getShader(item.color));
+            final int color = colored ? item.color : Color.WHITE;
+            paint.setShader(getShader(color));
             paint.setStrokeWidth(item.strokeWidth);
 
             path.reset();
@@ -118,6 +121,11 @@ public class Strings {
         for (final StringUI item : items) {
             item.settle();
         }
+    }
+
+    public void skipToNextState() {
+        prepareMove();
+        finishMove();
     }
 
 }

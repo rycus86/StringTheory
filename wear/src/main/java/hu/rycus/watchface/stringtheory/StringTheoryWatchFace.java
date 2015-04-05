@@ -6,10 +6,11 @@ import android.view.Gravity;
 import java.util.Collection;
 
 import hu.rycus.watchface.commons.BaseCanvasWatchFaceService;
-import hu.rycus.watchface.commons.BlackAmbientBackground;
 import hu.rycus.watchface.commons.Component;
-import hu.rycus.watchface.stringtheory.components.Background;
+import hu.rycus.watchface.stringtheory.components.BlackBackground;
+import hu.rycus.watchface.stringtheory.components.Date;
 import hu.rycus.watchface.stringtheory.components.HourAndMinute;
+import hu.rycus.watchface.stringtheory.components.StringsBackground;
 
 public class StringTheoryWatchFace extends BaseCanvasWatchFaceService {
 
@@ -27,22 +28,20 @@ public class StringTheoryWatchFace extends BaseCanvasWatchFaceService {
 
         @Override
         protected void createComponents(final Collection<Component> components) {
-            components.add(new BlackAmbientBackground());
-            components.add(new Background());
-            components.add(new HourAndMinute(getAssets()));
-            // TODO
+            components.add(new BlackBackground());
+            components.add(new StringsBackground());
+            components.add(new HourAndMinute());
+            components.add(new Date());
         }
 
         @Override
         protected WatchFaceStyle buildStyle(final WatchFaceStyle.Builder builder) {
             return builder
                     .setStatusBarGravity(Gravity.RIGHT | Gravity.TOP)
-                    .setHotwordIndicatorGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM)
-                    .setViewProtection(
-                            WatchFaceStyle.PROTECT_STATUS_BAR |
-                            WatchFaceStyle.PROTECT_HOTWORD_INDICATOR)
+                    .setHotwordIndicatorGravity(Gravity.CENTER)
+                    .setViewProtection(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_SHORT)
-                    .build(); // TODO
+                    .build();
         }
 
     }
