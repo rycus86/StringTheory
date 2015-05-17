@@ -31,11 +31,29 @@
                 <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
             </intent-filter>
 
+            <!-- wearable configuration activity -->
+            <meta-data
+                android:name=
+                    "com.google.android.wearable.watchface.wearableConfigurationAction"
+                android:value=
+                    "hu.rycus.watchface.stringtheory.config.CONFIG_STRING_THEORY" />
+
             <meta-data
                 android:name="com.google.android.gms.version"
                 android:value="@integer/google_play_services_version" />
 
         </service>
+
+        <activity android:name=".config.WearableConfigurationActivity"
+                  android:label="String Theory Watchface Configuration">
+
+            <intent-filter>
+                <action android:name="hu.rycus.watchface.stringtheory.config.CONFIG_STRING_THEORY" />
+                <category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+        </activity>
 
     </application>
 

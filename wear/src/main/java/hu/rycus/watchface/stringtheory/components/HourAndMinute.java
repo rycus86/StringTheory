@@ -7,7 +7,10 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.text.format.Time;
 
+import com.google.android.gms.wearable.DataMap;
+
 import hu.rycus.watchface.commons.Component;
+import hu.rycus.watchface.stringtheory.config.Configuration;
 
 public class HourAndMinute extends Component {
 
@@ -22,6 +25,8 @@ public class HourAndMinute extends Component {
     private Typeface normalTypeface;
     private Typeface boldTypeface;
 
+    private boolean display24hours = true;
+
     @Override
     protected void onSetupPaint(final Paint paint) {
         this.normalTypeface = Typeface.create(FONT_FAMILY, Typeface.NORMAL);
@@ -29,6 +34,17 @@ public class HourAndMinute extends Component {
 
         paint.setAntiAlias(true);
         paint.setColor(Color.WHITE);
+    }
+
+    @Override
+    protected void onApplyConfiguration(final DataMap configuration) {
+        super.onApplyConfiguration(configuration);
+
+        display24hours = Configuration.SHOW_24_HOURS.getBoolean(configuration);
+
+        final Time currentTime = new Time();
+        currentTime.setToNow();
+        prepareValues(currentTime);
     }
 
     @Override
@@ -48,7 +64,12 @@ public class HourAndMinute extends Component {
     private void prepareValues(final Time time) {
         final float baseTextSize = isRound ? 64f : 80f;
 
-        hour = time.format("%H");
+        if (display24hours) {
+            hour = time.format("%H");
+        } else {
+            hour = time.format("%I");
+        }
+
         paint.setTextSize(baseTextSize);
         paint.setTypeface(boldTypeface);
         paint.getTextBounds(hour, 0, hour.length(), hourBounds);
