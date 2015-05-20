@@ -6,14 +6,13 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
+import android.util.SparseArray;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 public class Strings {
 
-    private final Map<Integer, Shader> shaderByColor = new HashMap<>();
+    private final SparseArray<Shader> shaderByColor = new SparseArray<>();
     private final Path path = new Path();
     private final Random random = new Random();
 
