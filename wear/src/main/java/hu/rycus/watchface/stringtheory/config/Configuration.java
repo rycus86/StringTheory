@@ -12,7 +12,12 @@ public enum Configuration implements ConfigurationItem {
     SHOW_24_HOURS(binary()
             .key("24hour")
             .defaultValue(true)
-            .stringResource(R.string.config_24_hours));
+            .stringResource(R.string.config_24_hours)),
+
+    CONSTANT_ANIMATION(binary()
+            .key("constantAnimation")
+            .defaultValue(false)
+            .stringResource(R.string.config_constant_animation));
 
     public static final String PATH = "/string-theory";
 

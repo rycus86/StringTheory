@@ -4,9 +4,14 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.text.format.Time;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
+
+import com.google.android.gms.wearable.DataMap;
 
 import hu.rycus.watchface.commons.Animation;
 import hu.rycus.watchface.commons.Component;
+import hu.rycus.watchface.stringtheory.config.Configuration;
 import hu.rycus.watchface.stringtheory.ui.Strings;
 
 public class StringsBackground extends Component {
@@ -16,10 +21,12 @@ public class StringsBackground extends Component {
     private static final int MSG_TICK = 0x01;
     private static final long INTERVAL_TICK = 1000L;
 
-    private static final long ANIMATION_LENGTH = 350L;
+    private static final long SHORT_ANIMATION_LENGTH = 350L;
+    private static final long LONG_ANIMATION_LENGTH = 750L;
 
     private final Strings strings = new Strings(NUM_STRINGS);
-    private final DecelerateInterpolator interpolator = new DecelerateInterpolator();
+
+    private boolean constantAnimation = false;
 
     @Override
     protected boolean needsScheduler() {
@@ -41,20 +48,47 @@ public class StringsBackground extends Component {
     }
 
     @Override
+    protected void onApplyConfiguration(final DataMap configuration) {
+        super.onApplyConfiguration(configuration);
+
+        final boolean wasConstantAnimation = constantAnimation;
+        constantAnimation = Configuration.CONSTANT_ANIMATION.getBoolean(configuration);
+
+        if (wasConstantAnimation != constantAnimation) {
+            if (constantAnimation) {
+                cancel(MSG_TICK);
+                startAnimation();
+            } else {
+                schedule(MSG_TICK, INTERVAL_TICK);
+            }
+        }
+    }
+
+    @Override
     protected void onVisibilityChanged(final boolean visible) {
         super.onVisibilityChanged(visible);
+
         if (visible && !inAmbientMode) {
-            schedule(MSG_TICK, INTERVAL_TICK);
+            if (constantAnimation) {
+                startAnimation();
+            } else {
+                schedule(MSG_TICK, INTERVAL_TICK);
+            }
         }
     }
 
     @Override
     protected void onAmbientModeChanged(final boolean inAmbientMode) {
         super.onAmbientModeChanged(inAmbientMode);
+
         if (inAmbientMode) {
             cancel(MSG_TICK);
         } else {
-            schedule(MSG_TICK, INTERVAL_TICK);
+            if (constantAnimation) {
+                startAnimation();
+            } else {
+                schedule(MSG_TICK, INTERVAL_TICK);
+            }
         }
     }
 
@@ -73,21 +107,47 @@ public class StringsBackground extends Component {
     @Override
     protected void onHandleMessage(final int what) {
         if (MSG_TICK == what) {
-            strings.prepareMove();
-
-            setAnimation(new Animation(ANIMATION_LENGTH) {
-                @Override
-                protected void apply(final float progress) {
-                    final float interpolatedProgress = interpolator.getInterpolation(progress);
-                    strings.animate(interpolatedProgress);
-                }
-
-                @Override
-                protected void onFinished() {
-                    strings.finishMove();
-                }
-            });
+            startAnimation();
         }
+    }
+
+    private void startAnimation() {
+        if (hasAnimation()) {
+            return;
+        }
+
+        final Interpolator interpolator =
+                constantAnimation ?
+                        new LinearInterpolator() :
+                        new DecelerateInterpolator();
+
+        final long animationLength =
+                constantAnimation ?
+                        LONG_ANIMATION_LENGTH :
+                        SHORT_ANIMATION_LENGTH;
+
+        strings.prepareMove();
+
+        setAnimation(new Animation(animationLength) {
+            @Override
+            protected void apply(final float progress) {
+                final float interpolatedProgress = interpolator.getInterpolation(progress);
+                strings.animate(interpolatedProgress);
+            }
+
+            @Override
+            protected void onFinished() {
+                strings.finishMove();
+
+                if (shouldRestart()) {
+                    startAnimation();
+                }
+            }
+
+            private boolean shouldRestart() {
+                return constantAnimation && visible && !inAmbientMode;
+            }
+        });
     }
 
 }
