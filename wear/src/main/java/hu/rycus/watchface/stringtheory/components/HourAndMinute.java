@@ -9,6 +9,8 @@ import android.text.format.Time;
 import com.google.android.gms.wearable.DataMap;
 
 import hu.rycus.watchface.commons.Component;
+import hu.rycus.watchface.commons.DateTimeUI;
+import hu.rycus.watchface.commons.TimeField;
 import hu.rycus.watchface.stringtheory.config.Configuration;
 
 public class HourAndMinute extends Component {
@@ -18,10 +20,17 @@ public class HourAndMinute extends Component {
     private Typeface normalTypeface;
     private Typeface boldTypeface;
 
-    private boolean display24hours = true;
+    private final DateTimeUI hour =
+            new DateTimeUI.Builder()
+                    .field(TimeField.HOUR)
+                    .format("%H")
+                    .build();
 
-    private final HourUI hour = new HourUI(paint);
-    private final MinuteUI minute = new MinuteUI(paint);
+    private final DateTimeUI minute =
+            new DateTimeUI.Builder()
+                    .field(TimeField.MINUTE)
+                    .format("%M")
+                    .build();
 
     @Override
     protected void onSetupPaint(final Paint paint) {
@@ -35,7 +44,9 @@ public class HourAndMinute extends Component {
     @Override
     protected void onApplyConfiguration(final DataMap configuration) {
         super.onApplyConfiguration(configuration);
-        display24hours = Configuration.SHOW_24_HOURS.getBoolean(configuration);
+
+        final boolean display24hours = Configuration.SHOW_24_HOURS.getBoolean(configuration);
+        hour.changeFormat(display24hours ? "%H" : "%I");
     }
 
     @Override
@@ -52,70 +63,22 @@ public class HourAndMinute extends Component {
             top = 20f;
         }
 
-        hour.update(time);
-        minute.update(time);
-
         paint.setTextSize(baseTextSize);
         paint.setTypeface(boldTypeface);
-        canvas.drawText(hour.text, left, top + hour.height(), paint);
+
+        hour.update(time, paint);
+
+        canvas.drawText(hour.text(), left, top + hour.height(), paint);
 
         final float minuteTop = top + hour.height() * 0.35f;
         final float minuteLeft = left + hour.width() * 1.1f;
 
         paint.setTextSize(baseTextSize - 16f);
         paint.setTypeface(normalTypeface);
-        canvas.drawText(minute.text, minuteLeft, minuteTop + minute.height(), paint);
-    }
 
-    private class HourUI extends TextUI {
+        minute.update(time, paint);
 
-        public HourUI(final Paint paint) {
-            super(paint);
-        }
-
-        @Override
-        protected boolean hasChanged(final Time time) {
-            return time.hour != value;
-        }
-
-        @Override
-        protected void onUpdate(final Time time) {
-            value = time.hour;
-            text = display24hours ? time.format("%H") : time.format("%I");
-        }
-
-        @Override
-        protected void onPrepareMeasurement(final Paint paint) {
-            final float baseTextSize = isRound ? 64f : 80f;
-            paint.setTextSize(baseTextSize);
-            paint.setTypeface(boldTypeface);
-        }
-    }
-
-    private class MinuteUI extends TextUI {
-
-        public MinuteUI(final Paint paint) {
-            super(paint);
-        }
-
-        @Override
-        protected boolean hasChanged(final Time time) {
-            return time.minute != value;
-        }
-
-        @Override
-        protected void onUpdate(final Time time) {
-            value = time.minute;
-            text = time.format("%M");
-        }
-
-        @Override
-        protected void onPrepareMeasurement(final Paint paint) {
-            final float baseTextSize = isRound ? 64f : 80f;
-            paint.setTextSize(baseTextSize - 16f);
-            paint.setTypeface(normalTypeface);
-        }
-
+        canvas.drawText(minute.text(), minuteLeft, minuteTop + minute.height(), paint);
     }
 
 }

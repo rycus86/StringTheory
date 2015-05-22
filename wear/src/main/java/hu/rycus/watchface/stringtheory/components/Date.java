@@ -7,14 +7,25 @@ import android.graphics.Typeface;
 import android.text.format.Time;
 
 import hu.rycus.watchface.commons.Component;
+import hu.rycus.watchface.commons.DateTimeUI;
+import hu.rycus.watchface.commons.TimeField;
 
 public class Date extends Component {
 
     private static final String FONT_FAMILY = "sans-serif-condensed-light";
     private static final float TEXT_HEIGHT = 18f;
 
-    private final WeekDayAndDateUI weekDayAndDate = new WeekDayAndDateUI(paint);
-    private final MonthUI month = new MonthUI(paint);
+    private final DateTimeUI weekDayAndDate =
+            new DateTimeUI.Builder()
+                    .field(TimeField.DATE)
+                    .format("%a %d")
+                    .build();
+
+    private final DateTimeUI month =
+            new DateTimeUI.Builder()
+                    .field(TimeField.DATE)
+                    .format("%B")
+                    .build();
 
     @Override
     protected void onSetupPaint(final Paint paint) {
@@ -37,52 +48,14 @@ public class Date extends Component {
             top = 50f;
         }
 
-        weekDayAndDate.update(time);
-        month.update(time);
+        weekDayAndDate.update(time, paint);
+        month.update(time, paint);
 
         final float line1Bottom = top + TEXT_HEIGHT;
         final float line2Bottom = line1Bottom + TEXT_HEIGHT;
 
-        canvas.drawText(weekDayAndDate.text, left, line1Bottom, paint);
-        canvas.drawText(month.text, left, line2Bottom, paint);
-    }
-
-    private class WeekDayAndDateUI extends TextUI {
-
-        public WeekDayAndDateUI(final Paint paint) {
-            super(paint);
-        }
-
-        @Override
-        protected boolean hasChanged(final Time time) {
-            return time.yearDay != value;
-        }
-
-        @Override
-        protected void onUpdate(final Time time) {
-            value = time.yearDay;
-            text = time.format("%a %d");
-        }
-
-    }
-
-    private class MonthUI extends TextUI {
-
-        public MonthUI(final Paint paint) {
-            super(paint);
-        }
-
-        @Override
-        protected boolean hasChanged(final Time time) {
-            return time.yearDay != value;
-        }
-
-        @Override
-        protected void onUpdate(final Time time) {
-            value = time.yearDay;
-            text = time.format("%B");
-        }
-
+        canvas.drawText(weekDayAndDate.text(), left, line1Bottom, paint);
+        canvas.drawText(month.text(), left, line2Bottom, paint);
     }
 
 }
