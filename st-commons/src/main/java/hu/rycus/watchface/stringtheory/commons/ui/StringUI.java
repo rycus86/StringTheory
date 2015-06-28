@@ -1,4 +1,4 @@
-package hu.rycus.watchface.stringtheory.ui;
+package hu.rycus.watchface.stringtheory.commons.ui;
 
 import android.graphics.PointF;
 

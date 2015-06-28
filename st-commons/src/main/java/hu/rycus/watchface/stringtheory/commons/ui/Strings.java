@@ -1,4 +1,4 @@
-package hu.rycus.watchface.stringtheory.ui;
+package hu.rycus.watchface.stringtheory.commons.ui;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -27,44 +27,64 @@ public class Strings {
     private int xLimit;
     private int yLimit;
 
-    public Strings(final int count) {
+    public static class Builder {
+
+        private int stringCount;
+        private int firstColor;
+        private int lastColor;
+        private int defaultColor;
+
+        public Builder count(final int stringCount) {
+            this.stringCount = stringCount;
+            return this;
+        }
+
+        public Builder firstColor(final int firstColor) {
+            this.firstColor = firstColor;
+            return this;
+        }
+
+        public Builder lastColor(final int lastColor) {
+            this.lastColor = lastColor;
+            return this;
+        }
+
+        public Builder defaultColor(final int defaultColor) {
+            this.defaultColor = defaultColor;
+            return this;
+        }
+
+        public Strings build() {
+            return new Strings(stringCount, new StringColors(firstColor, lastColor, defaultColor));
+        }
+
+    }
+
+    private Strings(final int count, final StringColors colors) {
         this.items = new StringUI[count];
-        this.addStrings(count);
+        this.addStrings(count, colors);
     }
 
-    public void setCanvasSize(final int width, final int height) {
-        this.width = width;
-        this.halfWidth = width / 2f;
-        this.thirdWidth = width / 3f;
-        this.twoThirdWidth = this.thirdWidth * 2f;
-        this.halfHeight = height / 2f;
-
-        this.xLimit = width / 5;
-        this.yLimit = height;
-
-        this.skipToNextState();
-    }
-
-    private void addStrings(final int count) {
+    private void addStrings(final int count, final StringColors colors) {
         final float strokeWidthDiff = 0.05f;
         float strokeWidth = 1.25f;
 
         for (int idx = 0; idx < count; idx++) {
-            int color = Color.WHITE;
+            int color = colors.getDefaultColor();
             float sWidth = strokeWidth;
 
             if (idx == count - 3) {
-                color = Color.RED;
+                color = colors.getFirstColor();
                 sWidth = 3f;
             } else if (idx == count - 4) {
-                color = Color.GREEN;
+                color = colors.getLastColor();
                 sWidth = 2f;
             }
 
             final StringUI item = new StringUI(color, sWidth);
             items[idx] = item;
 
-            if (color == Color.WHITE) {
+            if (colors.isDefaultColor(color)) {
                 strokeWidth += strokeWidthDiff;
             }
         }
@@ -83,6 +103,19 @@ public class Strings {
         }
 
         return shader;
+    }
+
+    public void setCanvasSize(final int width, final int height) {
+        this.width = width;
+        this.halfWidth = width / 2f;
+        this.thirdWidth = width / 3f;
+        this.twoThirdWidth = this.thirdWidth * 2f;
+        this.halfHeight = height / 2f;
+
+        this.xLimit = width / 5;
+        this.yLimit = height;
+
+        this.skipToNextState();
     }
 
     public void draw(final Canvas canvas, final Paint paint, final boolean colored) {

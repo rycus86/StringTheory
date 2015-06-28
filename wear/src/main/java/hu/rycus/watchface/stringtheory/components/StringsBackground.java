@@ -1,6 +1,7 @@
 package hu.rycus.watchface.stringtheory.components;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.text.format.Time;
 import android.view.animation.DecelerateInterpolator;
@@ -12,7 +13,7 @@ import com.google.android.gms.wearable.DataMap;
 import hu.rycus.watchface.commons.Animation;
 import hu.rycus.watchface.commons.Component;
 import hu.rycus.watchface.stringtheory.config.Configuration;
-import hu.rycus.watchface.stringtheory.ui.Strings;
+import hu.rycus.watchface.stringtheory.commons.ui.Strings;
 
 public class StringsBackground extends Component {
 
@@ -24,7 +25,12 @@ public class StringsBackground extends Component {
     private static final long SHORT_ANIMATION_LENGTH = 350L;
     private static final long LONG_ANIMATION_LENGTH = 750L;
 
-    private final Strings strings = new Strings(NUM_STRINGS);
+    private final Strings strings = new Strings.Builder()
+            .count(NUM_STRINGS)
+            .firstColor(Color.RED)
+            .lastColor(Color.GREEN)
+            .defaultColor(Color.WHITE)
+            .build();
 
     private boolean constantAnimation = false;
 
