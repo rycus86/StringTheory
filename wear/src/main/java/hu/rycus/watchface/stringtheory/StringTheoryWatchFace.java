@@ -11,7 +11,7 @@ import hu.rycus.watchface.stringtheory.components.BlackBackground;
 import hu.rycus.watchface.stringtheory.components.Date;
 import hu.rycus.watchface.stringtheory.components.HourAndMinute;
 import hu.rycus.watchface.stringtheory.components.StringsBackground;
-import hu.rycus.watchface.stringtheory.config.Configuration;
+import hu.rycus.watchface.stringtheory.commons.config.Configuration;
 
 public class StringTheoryWatchFace extends BaseCanvasWatchFaceService {
 

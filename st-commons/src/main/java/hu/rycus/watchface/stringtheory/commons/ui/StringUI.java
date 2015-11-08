@@ -34,7 +34,11 @@ class StringUI {
     }
 
     private static float next(final Random random, final int base) {
-        return random.nextInt(base) - base / 2f;
+        if (base > 0) {
+            return random.nextInt(base) - base / 2f;
+        } else {
+            return 0f;
+        }
     }
     
     void move(final float progress) {

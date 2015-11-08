@@ -11,7 +11,7 @@ import com.google.android.gms.wearable.DataMap;
 import hu.rycus.watchface.commons.Component;
 import hu.rycus.watchface.commons.DateTimeUI;
 import hu.rycus.watchface.commons.TimeField;
-import hu.rycus.watchface.stringtheory.config.Configuration;
+import hu.rycus.watchface.stringtheory.commons.config.Configuration;
 
 public class HourAndMinute extends Component {
 

@@ -10,13 +10,15 @@ import android.util.SparseArray;
 
 import java.util.Random;
 
+import hu.rycus.watchface.stringtheory.commons.config.Palette;
+
 public class Strings {
 
     private final SparseArray<Shader> shaderByColor = new SparseArray<>();
     private final Path path = new Path();
     private final Random random = new Random();
 
-    private final StringUI[] items;
+    private StringUI[] items;
 
     private float width;
     private float halfWidth;
@@ -54,18 +56,34 @@ public class Strings {
             return this;
         }
 
+        public Builder palette(final Palette palette) {
+            return this
+                    .firstColor(palette.get(0))
+                    .lastColor(palette.get(1))
+                    .defaultColor(palette.get(2));
+        }
+
         public Strings build() {
-            return new Strings(stringCount, new StringColors(firstColor, lastColor, defaultColor));
+            return new Strings(stringCount, getColors());
+        }
+
+        public void update(final Strings strings) {
+            strings.configure(stringCount, getColors());
+        }
+
+        private StringColors getColors() {
+            return new StringColors(firstColor, lastColor, defaultColor);
         }
 
     }
 
     private Strings(final int count, final StringColors colors) {
-        this.items = new StringUI[count];
-        this.addStrings(count, colors);
+        this.configure(count, colors);
     }
 
-    private void addStrings(final int count, final StringColors colors) {
+    private void configure(final int count, final StringColors colors) {
+        this.items = new StringUI[count];
+
         final float strokeWidthDiff = 0.05f;
         float strokeWidth = 1.25f;
 
@@ -95,9 +113,10 @@ public class Strings {
         if (shader == null) {
             final int opaque = color | 0xFF000000;
             final int transparent = color & 0x00FFFFFF;
+            final float radius = Math.max(halfWidth, halfHeight);
 
             shader = new RadialGradient(
-                    halfWidth, halfHeight, Math.min(halfWidth, halfHeight),
+                    halfWidth, halfHeight, Math.max(0.1f, radius),
                     opaque, transparent, Shader.TileMode.CLAMP);
             shaderByColor.put(color, shader);
         }
@@ -118,11 +137,32 @@ public class Strings {
         this.skipToNextState();
     }
 
-    public void draw(final Canvas canvas, final Paint paint, final boolean colored) {
-        for (final StringUI item : items) {
+    public void draw(final Canvas canvas, final Paint paint,
+                     final boolean colored, final boolean useTransparency) {
+
+        final boolean antialias = paint.isAntiAlias();
+        if (!useTransparency) {
+            paint.setAntiAlias(false);
+        }
+
+        final int count;
+        if (useTransparency) {
+            count = items.length;
+        } else {
+            count = Math.min(items.length, 5);
+        }
+
+        for (int index = 0; index < count; index++) {
+            final StringUI item = items[index];
             final int color = colored ? item.color : Color.WHITE;
-            paint.setShader(getShader(color));
-            paint.setStrokeWidth(item.strokeWidth);
+
+            if (useTransparency) {
+                paint.setShader(getShader(color));
+                paint.setStrokeWidth(item.strokeWidth);
+            } else {
+                paint.setColor(color);
+                paint.setStrokeWidth(Math.min(item.strokeWidth, 1.5f));
+            }
 
             path.reset();
             path.moveTo(0, halfHeight);
@@ -134,6 +174,7 @@ public class Strings {
             canvas.drawPath(path, paint);
         }
 
+        paint.setAntiAlias(antialias);
         paint.setShader(null);
     }
 

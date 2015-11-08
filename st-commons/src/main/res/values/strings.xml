@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">String Theory Commons</string>
+
+    <string name="config_24_hours">24 hours format</string>
+    <string name="config_constant_animation">Constant animation</string>
+    <string name="config_number_of_string">Number of strings</string>
+    <string name="config_number_of_string_07">7</string>
+    <string name="config_number_of_string_10">10</string>
+    <string name="config_number_of_string_12">12</string>
+    <string name="config_number_of_string_15">15</string>
+    <string name="config_palette">String colors</string>
 </resources>

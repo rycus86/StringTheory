@@ -55,6 +55,9 @@
 
         </activity>
 
+        <activity android:name=".commons.config.GroupSelectionActivity"/>
+        <activity android:name=".config.PaletteSelectionActivity"/>
+
     </application>
 
 </manifest>

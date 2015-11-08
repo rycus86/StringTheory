@@ -1,7 +1,6 @@
 package hu.rycus.watchface.stringtheory.components;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.text.format.Time;
 import android.view.animation.DecelerateInterpolator;
@@ -12,7 +11,8 @@ import com.google.android.gms.wearable.DataMap;
 
 import hu.rycus.watchface.commons.Animation;
 import hu.rycus.watchface.commons.Component;
-import hu.rycus.watchface.stringtheory.config.Configuration;
+import hu.rycus.watchface.stringtheory.commons.config.Configuration;
+import hu.rycus.watchface.stringtheory.commons.config.Palette;
 import hu.rycus.watchface.stringtheory.commons.ui.Strings;
 
 public class StringsBackground extends Component {
@@ -27,9 +27,7 @@ public class StringsBackground extends Component {
 
     private final Strings strings = new Strings.Builder()
             .count(NUM_STRINGS)
-            .firstColor(Color.RED)
-            .lastColor(Color.GREEN)
-            .defaultColor(Color.WHITE)
+            .palette(Palette.ORIGINAL)
             .build();
 
     private boolean constantAnimation = false;
@@ -68,6 +66,23 @@ public class StringsBackground extends Component {
                 schedule(MSG_TICK, INTERVAL_TICK);
             }
         }
+
+        final Palette palette = Configuration.PALETTE.getPalette(configuration);
+
+        final Configuration countConfiguration =
+                Configuration.NUMBER_OF_STRINGS.getGroupSelection(configuration);
+
+        if (countConfiguration != null) {
+            final Integer count = countConfiguration.getInteger(configuration);
+            if (count != null) {
+                new Strings.Builder()
+                        .count(count)
+                        .palette(palette)
+                        .update(strings);
+
+                strings.skipToNextState();
+            }
+        }
     }
 
     @Override
@@ -100,7 +115,10 @@ public class StringsBackground extends Component {
 
     @Override
     protected void onDraw(final Canvas canvas, final Time time) {
-        strings.draw(canvas, paint, !inAmbientMode);
+        final boolean useColors = !inAmbientMode;
+        final boolean useTransparency = !(inAmbientMode && lowBitAmbient);
+
+        strings.draw(canvas, paint, useColors, useTransparency);
     }
 
     @Override
